@@ -114,6 +114,8 @@ extern const PinDescription g_APinDescription[] ;
 #define REF_VDD_15_16 NRF_LPCOMP_REF_SUPPLY_15_16
 #define AREF NRF_LPCOMP_REF_EXT_REF0
 
+extern const uint32_t g_ADigitalPinMap[];
+
 typedef enum{
     UP = NRF_LPCOMP_DETECT_UP,
     DOWN = NRF_LPCOMP_DETECT_DOWN,
