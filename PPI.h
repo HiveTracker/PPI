@@ -50,13 +50,15 @@ typedef enum{
 typedef enum{
     TIMER_START = 0X00,
     TIMER_STOP = 0X01,
+    TIMER_CLEAR = 0X02,
+    TIMER_CAPTURE = 0X03,
+    TIMER_DEFAULT = 0X0F,
     PIN_SET = 0X10,
     PIN_CLEAR = 0X11,
     PIN_TOGGLE = 0X12,
     NFC_START_SENSE = 0X30,
     NFC_STOP_SENSE = 0X31
 }task_type;
-
 
 class PPIClass{
 
@@ -128,7 +130,7 @@ class PPIClass{
 
     private:
 
-        void configureTimer(void);
+        void configureTimer(task_type task=TIMER_DEFAULT);
         void configureGPIOTask(task_type task);
         void configureGPIOEvent(event_type event);
         void configureCompEvent(detect_mode mode);

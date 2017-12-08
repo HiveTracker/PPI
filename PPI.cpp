@@ -23,6 +23,7 @@
 
 
 #include "PPI.h"
+#include "nRF_SDK/nrf_timer.h"
 
 nrf_ppi_channel_t channels[20] = {NRF_PPI_CHANNEL0, NRF_PPI_CHANNEL1,
     NRF_PPI_CHANNEL2, NRF_PPI_CHANNEL3, NRF_PPI_CHANNEL4, NRF_PPI_CHANNEL5,
@@ -96,21 +97,31 @@ int PPIClass::setShortcut(event_type event, task_type task){
             configureGPIOEvent(event);
             switch(task & 0xF0){
                 case 0x00: //task is related to timer
-                    if((task & 0x0F)==0){    //start task
-                        configureTimer();
-                        //enable PPI peripheral
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)nrf_gpiote_event_addr_get(gpio_eventNo[event_index]),
-                                (uint32_t)nrf_timer_task_address_get(NRF_TIMER1, NRF_TIMER_TASK_START));
-                        nrf_ppi_channel_enable(channels[first_free_channel]);
+                    nrf_timer_task_t nrf_task;
+
+                    switch(task){                               // TODO: move to configureTimer()
+                        case TIMER_CLEAR:
+                            nrf_task = NRF_TIMER_TASK_CLEAR;
+                            break;
+                        case TIMER_START:
+                            nrf_task = NRF_TIMER_TASK_START;
+                            configureTimer(TIMER_START);
+                            break;
+                        case TIMER_CAPTURE:
+                            nrf_task = NRF_TIMER_TASK_CAPTURE0; // TODO: make it generic
+                            configureTimer(TIMER_CAPTURE);
+                            break;
+                        case TIMER_STOP:
+                            nrf_task = NRF_TIMER_TASK_STOP;
+                            break;
+                        default: //task not recognized
+                            return 0;
                     }
-                    else{    //stop task
-                        //enable PPI peripheral
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)nrf_gpiote_event_addr_get(gpio_eventNo[event_index]),
-                                (uint32_t)nrf_timer_task_address_get(NRF_TIMER1, NRF_TIMER_TASK_STOP));
-                        nrf_ppi_channel_enable(channels[first_free_channel]);
-                    }
+
+                    nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
+                            (uint32_t)nrf_gpiote_event_addr_get(gpio_eventNo[event_index]),
+                            (uint32_t)nrf_timer_task_address_get(NRF_TIMER1, nrf_task));
+                    nrf_ppi_channel_enable(channels[first_free_channel]);
                     break;
                 case 0x10: //task is related to GPIO
                     configureGPIOTask(task);
@@ -302,16 +313,17 @@ void PPIClass::setCompReference(nrf_lpcomp_ref_t ref){
 //private function
 
 //functions to configure events
-void PPIClass::configureTimer(){
+void PPIClass::configureTimer(task_type task){                                  // TODO: allow different TIMER
     nrf_timer_mode_set(NRF_TIMER1, NRF_TIMER_MODE_TIMER);
     nrf_timer_bit_width_set(NRF_TIMER1, NRF_TIMER_BIT_WIDTH_32);
-    nrf_timer_frequency_set(NRF_TIMER1, NRF_TIMER_FREQ_1MHz);
-    //Clear the timer when it finishes to count
-    nrf_timer_shorts_enable(NRF_TIMER1, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
+    nrf_timer_frequency_set(NRF_TIMER1, NRF_TIMER_FREQ_16MHz);                  // TODO 1MHz for others
 
-    uint32_t ticks=nrf_timer_ms_to_ticks(milliSec, NRF_TIMER_FREQ_1MHz);
-    nrf_timer_cc_write(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0, ticks);
-
+    if(task == TIMER_DEFAULT){ // default value is for the
+        nrf_timer_shorts_enable(NRF_TIMER1, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
+        //Clear the timer when it finishes to count
+        uint32_t ticks=nrf_timer_ms_to_ticks(milliSec, NRF_TIMER_FREQ_16MHz);
+        nrf_timer_cc_write(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0, ticks);
+    }
 }
 
 void PPIClass::configureGPIOEvent(event_type event){
