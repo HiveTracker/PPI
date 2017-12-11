@@ -29,7 +29,6 @@
 #include "nRF_SDK/nrf_ppi.h"
 #include "nRF_SDK/nrf_timer.h"
 #include "nRF_SDK/nrf_gpiote.h"
-#include "nRF_SDK/nrf_lpcomp.h"
 
 
 //enumerate events and tasks
@@ -40,11 +39,6 @@ typedef enum{
     PIN_HIGH = 0X10,
     PIN_LOW = 0X11,
     PIN_CHANGE = 0X12,
-    COMP_DOWN = 0X20,
-    COMP_UP = 0X21,
-    COMP_CROSS = 0X22,
-    NFC_FIELD_DETECTED = 0X30,
-    POWER_WARNING = 0X40
 }event_type;
 
 typedef enum{
@@ -56,8 +50,6 @@ typedef enum{
     PIN_SET = 0X10,
     PIN_CLEAR = 0X11,
     PIN_TOGGLE = 0X12,
-    NFC_START_SENSE = 0X30,
-    NFC_STOP_SENSE = 0X31
 }task_type;
 
 class PPIClass{
@@ -115,25 +107,11 @@ class PPIClass{
         void setTimerInterval(uint32_t msec);
 
 
-        /**
-         * @brief
-         * Name:
-         *            setCompReference
-         * Description:
-         *            Select an analog reference used when the event is related
-         *            to the comparator.
-         * Argument:
-         *            pin: pin's number.
-         */
-        void setCompReference(nrf_lpcomp_ref_t ref);
-
-
     private:
 
         void configureTimer(task_type task=TIMER_DEFAULT);
         void configureGPIOTask(task_type task);
         void configureGPIOEvent(event_type event);
-        void configureCompEvent(detect_mode mode);
 };
 
 extern PPIClass PPI;

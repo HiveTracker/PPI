@@ -47,7 +47,6 @@ uint8_t task_index;
 
 uint32_t milliSec=1000;
 uint32_t outputPin=LED_BUILTIN;
-nrf_lpcomp_ref_t reference=REF_VDD_1_2;
 uint32_t inputPin=0;                                                        // TODO
 
 
@@ -131,15 +130,6 @@ int PPIClass::setShortcut(event_type event, task_type task){
                             nrf_gpiote_task_addr_get(gpio_taskNo[task_index]));
                     nrf_ppi_channel_enable(channels[first_free_channel]);
                     break;
-                case 0x30: //task is related to NFC
-                    if((task & 0x0F)==0) //start sensing
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)nrf_gpiote_event_addr_get(gpio_eventNo[event_index]), 0x40005008);
-                    else //stop sensing
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)nrf_gpiote_event_addr_get(gpio_eventNo[event_index]), 0x40005004);
-                    nrf_ppi_channel_enable(channels[first_free_channel]);
-                    break;
                 default: //task not recognized
                     return 0;
                     break;
@@ -148,143 +138,6 @@ int PPIClass::setShortcut(event_type event, task_type task){
             nrf_gpiote_event_enable(event_index);
             break;
 
-        case 0x20:
-            //event is related to comparator
-            nrf_lpcomp_event_t active_event;
-            detect_mode mode;
-            switch(event&0x0F){
-                case 0:
-                    active_event=NRF_LPCOMP_EVENT_DOWN;
-                    mode=DOWN;
-                    break;
-                case 1:
-                    active_event=NRF_LPCOMP_EVENT_UP;
-                    mode=UP;
-                    break;
-                default: // case 2:                                                                        // TODO?
-                    active_event=NRF_LPCOMP_EVENT_CROSS;
-                    mode=CROSS;
-                    break;
-            }
-
-            configureCompEvent(mode);
-            switch(task & 0xF0){
-                case 0x00: //task is related to timer
-                    if((task & 0x0F)==0){    //start task
-                        configureTimer();
-                        //enable PPI peripheral
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)nrf_lpcomp_event_address_get(active_event),
-                                (uint32_t)nrf_timer_task_address_get(NRF_TIMER1, NRF_TIMER_TASK_START));
-                        nrf_ppi_channel_enable(channels[first_free_channel]);
-                    }
-                    else{    //stop task
-                        //enable PPI peripheral
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)nrf_lpcomp_event_address_get(active_event),
-                                (uint32_t)nrf_timer_task_address_get(NRF_TIMER1, NRF_TIMER_TASK_STOP));
-                        nrf_ppi_channel_enable(channels[first_free_channel]);
-                    }
-                    break;
-                case 0x10: //task is related to GPIO
-                    configureGPIOTask(task);
-                    //enable PPI peripheral
-                    nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                            (uint32_t)nrf_lpcomp_event_address_get(active_event),
-                            nrf_gpiote_task_addr_get(gpio_taskNo[task_index]));
-                    nrf_ppi_channel_enable(channels[first_free_channel]);
-                    break;
-                case 0x30: //task is related to NFC
-                    if((task & 0x0F)==0) //start sensing
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)nrf_lpcomp_event_address_get(active_event), 0x40005008);
-                    else //stop sensing
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)nrf_lpcomp_event_address_get(active_event), 0x40005004);
-                    nrf_ppi_channel_enable(channels[first_free_channel]);
-                    break;
-                default: //task not recognized
-                    return 0;
-                    break;
-            }
-            //start comparator
-            nrf_lpcomp_task_trigger(NRF_LPCOMP_TASK_START);
-            break;
-
-        case 0x30:
-            //event is related to NFC
-            switch(task & 0xF0){
-                case 0x00: //task is related to timer
-                    if((task & 0x0F)==0){    //start task
-                        configureTimer();
-                        //enable PPI peripheral
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)0x40005104,
-                                (uint32_t)nrf_timer_task_address_get(NRF_TIMER1, NRF_TIMER_TASK_START));
-                        nrf_ppi_channel_enable(channels[first_free_channel]);
-                    }
-                    else{    //stop task
-                        //enable PPI peripheral
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)0x40005104,
-                                (uint32_t)nrf_timer_task_address_get(NRF_TIMER1, NRF_TIMER_TASK_STOP));
-                        nrf_ppi_channel_enable(channels[first_free_channel]);
-                    }
-                    break;
-                case 0x10: //task is related to GPIO
-                    configureGPIOTask(task);
-                    //enable PPI peripheral
-                    nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                            (uint32_t)0x40005104, nrf_gpiote_task_addr_get(gpio_taskNo[task_index]));
-                    nrf_ppi_channel_enable(channels[first_free_channel]);
-                    break;
-                default: //task not recognized
-                    return 0;
-                    break;
-            }
-            break;
-
-        case 0x40:
-            //event is related to Power
-            // sd_power_pof_enable(true);                                                                           // TODO ?
-            switch(task & 0xF0){
-                case 0x00: //task is related to timer
-                    if((task & 0x0F)==0){    //start task
-                        configureTimer();
-                        //enable PPI peripheral
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)0x40000108,(uint32_t)nrf_timer_task_address_get(NRF_TIMER1, NRF_TIMER_TASK_START));
-                        nrf_ppi_channel_enable(channels[first_free_channel]);
-                    }
-                    else{    //stop task
-                        //enable PPI peripheral
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)0x40000108, (uint32_t)nrf_timer_task_address_get(NRF_TIMER1, NRF_TIMER_TASK_STOP));
-                        nrf_ppi_channel_enable(channels[first_free_channel]);
-                    }
-                    break;
-                case 0x10: //task is related to GPIO
-                    configureGPIOTask(task);
-                    //enable PPI peripheral
-                    nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                            (uint32_t)0x40000108, nrf_gpiote_task_addr_get(gpio_taskNo[task_index]));
-                    nrf_ppi_channel_enable(channels[first_free_channel]);
-                    break;
-                case 0x30: //task is related to NFC
-                    if((task & 0x0F)==0) //start sensing
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)0x40000108, 0x40005008);
-                    else //stop sensing
-                        nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)0x40000108, 0x40005004);
-                    nrf_ppi_channel_enable(channels[first_free_channel]);
-                    break;
-                default: //task not recognized
-                    return 0;
-                    break;
-            }
-
-            break;
         default:
             return 0;    //event not recognized
             break;
@@ -304,10 +157,6 @@ void PPIClass::setOutputPin(uint32_t pin){
 
 void PPIClass::setTimerInterval(uint32_t msec){
     milliSec=msec;
-}
-
-void PPIClass::setCompReference(nrf_lpcomp_ref_t ref){
-    reference=ref;
 }
 
 //private function
@@ -347,19 +196,6 @@ void PPIClass::configureGPIOEvent(event_type event){
     event_index=gpiote_config_index;
     gpiote_config_index++;
 }
-
-void PPIClass::configureCompEvent(detect_mode mode){
-    nrf_lpcomp_config_t config={reference, (nrf_lpcomp_detect_t)mode};
-    nrf_lpcomp_configure(&config);
-    if(inputPin<14 && inputPin>19)
-        return;    //no analog pin is choosen
-    nrf_lpcomp_input_t analog_pin[]={NRF_LPCOMP_INPUT_1, NRF_LPCOMP_INPUT_2, NRF_LPCOMP_INPUT_4,
-        NRF_LPCOMP_INPUT_5, NRF_LPCOMP_INPUT_6, NRF_LPCOMP_INPUT_7};
-    nrf_lpcomp_input_select(analog_pin[inputPin-14]);
-    nrf_lpcomp_enable();
-
-}
-
 
 //function to configure tasks
 void PPIClass::configureGPIOTask(task_type task){
