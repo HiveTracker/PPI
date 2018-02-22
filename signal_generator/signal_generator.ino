@@ -1,9 +1,9 @@
 const int testPin = 0;
 
 /* Timings in microseconds
-    ___             ___
-___|   |___________|
-   0  100         400
+    ___                ___
+___|   |_____...______|
+   0   100            10000
 
 */
 
@@ -19,6 +19,6 @@ void loop()
     delayMicroseconds(100);
 
     digitalWrite(testPin, LOW);
-    delayMicroseconds(300);
+    delay(10);
 }
 
