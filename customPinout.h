@@ -22,5 +22,10 @@
 #define PIN_WIRE_SDA         (29)
 #define PIN_WIRE_SCL         (28)
 
+// Photodiodes
+const int diodes_num = 4; // 0,  1,  2,  3
+const int diode_e_pins[] = {22, 18, 20, 19};
+const int diode_d_pins[] = {24, 21,  4, 11};
+
 #endif // _PINOUT_
 
