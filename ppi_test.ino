@@ -1,7 +1,6 @@
 #include "customPinout.h"
 #include "PPI.h"
 
-#define E0 22
 bool state = 0;
 
 void setup() {
@@ -12,7 +11,7 @@ void setup() {
     pinMode(PIN_SERIAL_RX, OUTPUT);
 
     // measure pulse width
-    PPI.setInputPin(E0);
+    PPI.setInputPin(diode_e_pins[0]);
 
     PPI.setShortcut(PIN_HIGH, TIMER_CLEAR);
     PPI.setShortcut(PIN_HIGH, TIMER_START);
@@ -21,7 +20,7 @@ void setup() {
     PPI.setShortcut(PIN_LOW, TIMER_STOP); // capture register 0 for now
 
     // interrupt
-    attachInterrupt(E0, callback, FALLING);
+    attachInterrupt(diode_e_pins[0], callback, FALLING);
 }
 
 
@@ -37,5 +36,53 @@ void callback() {
     Serial.println(cc/16.); // convert to microseconds
 }
 
+
 void loop() {}
+
+
+// Ideal setting function:
+void setPPIcaptures() {
+
+    PPI.setTimer(1);
+
+    PPI.setInputPin(diode_e_pins[0]);
+    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // chanel 0
+    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // chanel 1
+
+    PPI.setInputPin(diode_e_pins[1]);
+    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // chanel 2
+    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // chanel 3
+
+    PPI.setTimer(2);
+
+    PPI.setInputPin(diode_e_pins[2]);
+    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // chanel 0
+    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // chanel 1
+
+    PPI.setInputPin(diode_e_pins[3]);
+    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // chanel 2
+    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // chanel 3
+}
+
+
+
+// Ideal setting function:
+void setPPIresets() {
+
+    PPI.setTimer(1);
+
+    PPI.setInputPin(diode_e_pins[0]);
+    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // chanel 0
+
+    PPI.setInputPin(diode_e_pins[1]);
+    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // chanel 1
+
+    PPI.setTimer(2);
+
+    PPI.setInputPin(diode_e_pins[2]);
+    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // chanel 2
+
+    PPI.setInputPin(diode_e_pins[3]);
+    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // chanel 3
+}
 

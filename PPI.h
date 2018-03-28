@@ -106,6 +106,7 @@ class PPIClass{
          */
         void setTimerInterval(uint32_t msec);
 
+        void setTimer(int _timerNo);
 
     private:
 

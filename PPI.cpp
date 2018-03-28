@@ -39,6 +39,9 @@ nrf_gpiote_events_t gpio_eventNo[] = {NRF_GPIOTE_EVENTS_IN_0,
     NRF_GPIOTE_EVENTS_IN_1, NRF_GPIOTE_EVENTS_IN_2, NRF_GPIOTE_EVENTS_IN_3,
     NRF_GPIOTE_EVENTS_IN_4, NRF_GPIOTE_EVENTS_IN_5, NRF_GPIOTE_EVENTS_IN_6,
     NRF_GPIOTE_EVENTS_IN_7};
+NRF_TIMER_Type * timers[] = { NRF_TIMER0, NRF_TIMER1, NRF_TIMER2,
+                              NRF_TIMER3, NRF_TIMER4 };
+int timerNo = 1; // 0 is used by soft device
 
 uint8_t first_free_channel=0;
 uint8_t gpiote_config_index=0;
@@ -67,18 +70,18 @@ int PPIClass::setShortcut(event_type event, task_type task){
                     configureGPIOTask(task);
                     //enable PPI peripheral
                     nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                            (uint32_t)nrf_timer_event_address_get(NRF_TIMER1, NRF_TIMER_EVENT_COMPARE0),
+                            (uint32_t)nrf_timer_event_address_get(timers[timerNo], NRF_TIMER_EVENT_COMPARE0),
                             nrf_gpiote_task_addr_get(gpio_taskNo[task_index]));
                     nrf_ppi_channel_enable(channels[first_free_channel]);
                     break;
                 case 0x30: //task is related to NFC
                     if((task & 0x0F)==0) //start sensing
                         nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)nrf_timer_event_address_get(NRF_TIMER1, NRF_TIMER_EVENT_COMPARE0),
+                                (uint32_t)nrf_timer_event_address_get(timers[timerNo], NRF_TIMER_EVENT_COMPARE0),
                                 0x40005008);
                     else    //stop sensing
                         nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
-                                (uint32_t)nrf_timer_event_address_get(NRF_TIMER1, NRF_TIMER_EVENT_COMPARE0),
+                                (uint32_t)nrf_timer_event_address_get(timers[timerNo], NRF_TIMER_EVENT_COMPARE0),
                                 0x40005004);
 
                     nrf_ppi_channel_enable(channels[first_free_channel]);
@@ -88,7 +91,7 @@ int PPIClass::setShortcut(event_type event, task_type task){
                     break;
             }
             //start the timer
-            nrf_timer_task_trigger(NRF_TIMER1, NRF_TIMER_TASK_START);
+            nrf_timer_task_trigger(timers[timerNo], NRF_TIMER_TASK_START);
             break;
 
         case 0x10:
@@ -119,7 +122,7 @@ int PPIClass::setShortcut(event_type event, task_type task){
 
                     nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
                             (uint32_t)nrf_gpiote_event_addr_get(gpio_eventNo[event_index]),
-                            (uint32_t)nrf_timer_task_address_get(NRF_TIMER1, nrf_task));
+                            (uint32_t)nrf_timer_task_address_get(timers[timerNo], nrf_task));
                     nrf_ppi_channel_enable(channels[first_free_channel]);
                     break;
                 case 0x10: //task is related to GPIO
@@ -162,16 +165,16 @@ void PPIClass::setTimerInterval(uint32_t msec){
 //private function
 
 //functions to configure events
-void PPIClass::configureTimer(task_type task){                                  // TODO: allow different TIMER
-    nrf_timer_mode_set(NRF_TIMER1, NRF_TIMER_MODE_TIMER);
-    nrf_timer_bit_width_set(NRF_TIMER1, NRF_TIMER_BIT_WIDTH_32);
-    nrf_timer_frequency_set(NRF_TIMER1, NRF_TIMER_FREQ_16MHz);                  // TODO 1MHz for others
+void PPIClass::configureTimer(task_type task){                                  // TODO: CHECK WITH INTERRUPT LIB!
+    nrf_timer_mode_set(timers[timerNo], NRF_TIMER_MODE_TIMER);
+    nrf_timer_bit_width_set(timers[timerNo], NRF_TIMER_BIT_WIDTH_32);
+    nrf_timer_frequency_set(timers[timerNo], NRF_TIMER_FREQ_16MHz);
 
     if(task == TIMER_DEFAULT){ // default value is for the
-        nrf_timer_shorts_enable(NRF_TIMER1, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
+        nrf_timer_shorts_enable(timers[timerNo], NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
         //Clear the timer when it finishes to count
         uint32_t ticks=nrf_timer_ms_to_ticks(milliSec, NRF_TIMER_FREQ_16MHz);
-        nrf_timer_cc_write(NRF_TIMER1, NRF_TIMER_CC_CHANNEL0, ticks);
+        nrf_timer_cc_write(timers[timerNo], NRF_TIMER_CC_CHANNEL0, ticks);      // TODO: ALLOW OTHER CHANNELS!
     }
 }
 
@@ -224,6 +227,10 @@ void PPIClass::configureGPIOTask(task_type task){
 
     task_index=gpiote_config_index;
     gpiote_config_index++;
+}
+
+void PPIClass::setTimer(int _timerNo) {
+    timerNo = _timerNo;
 }
 
 PPIClass PPI;
