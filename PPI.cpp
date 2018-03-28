@@ -233,4 +233,12 @@ void PPIClass::setTimer(int _timerNo) {
     timerNo = _timerNo;
 }
 
+void PPIClass::resetChannels() {
+    // TODO: reset first_free_channel too
+    for (int i = 0; i < 20; i++) {
+        nrf_ppi_channel_endpoint_setup(channels[i], 0, 0);
+        nrf_ppi_channel_disable(channels[i]);
+    }
+}
+
 PPIClass PPI;

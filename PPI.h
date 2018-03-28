@@ -107,12 +107,14 @@ class PPIClass{
         void setTimerInterval(uint32_t msec);
 
         void setTimer(int _timerNo);
+        void resetChannels();
 
     private:
 
         void configureTimer(task_type task=TIMER_DEFAULT);
         void configureGPIOTask(task_type task);
         void configureGPIOEvent(event_type event);
+
 };
 
 extern PPIClass PPI;

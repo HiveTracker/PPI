@@ -42,6 +42,7 @@ void loop() {}
 
 // Ideal setting function:
 void setPPIcaptures() {
+    PPI.resetChannels();    // TODO?
 
     PPI.setTimer(1);
 
@@ -68,6 +69,7 @@ void setPPIcaptures() {
 
 // Ideal setting function:
 void setPPIresets() {
+    PPI.resetChannels();    // TODO?
 
     PPI.setTimer(1);
 
@@ -85,4 +87,5 @@ void setPPIresets() {
     PPI.setInputPin(diode_e_pins[3]);
     PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // chanel 3
 }
+
 
