@@ -55,6 +55,9 @@ typedef enum{
 class PPIClass{
 
     public:
+
+        PPIClass();
+
         /**
          * @brief
          * Name:
@@ -106,10 +109,40 @@ class PPIClass{
          */
         void setTimerInterval(uint32_t msec);
 
+
+        /**
+         * @brief
+         * Name:
+         *            setTimer
+         * Description:
+         *            Set timer number for the object
+         * Argument:
+         *            _timerNo: the number of the timer
+         */
         void setTimer(int _timerNo);
+
+
+        /**
+         * @brief
+         * Name:
+         *            resetChannels
+         * Description:
+         *            Reset PPI channels
+         */
         void resetChannels();
 
     private:
+
+        uint8_t timerNo;
+
+        uint8_t first_free_channel;
+        uint8_t gpiote_config_index;
+        uint8_t event_index;
+        uint8_t task_index;
+
+        uint32_t milliSec;
+        uint32_t outputPin;
+        uint32_t inputPin;
 
         void configureTimer(task_type task=TIMER_DEFAULT);
         void configureGPIOTask(task_type task);
@@ -121,3 +154,4 @@ extern PPIClass PPI;
 
 
 #endif //PPI_h
+

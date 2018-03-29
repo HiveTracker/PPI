@@ -25,35 +25,34 @@
 #include "PPI.h"
 #include "nRF_SDK/nrf_timer.h"
 
-nrf_ppi_channel_t channels[20] = {NRF_PPI_CHANNEL0, NRF_PPI_CHANNEL1,
+const nrf_ppi_channel_t channels[20] = {NRF_PPI_CHANNEL0, NRF_PPI_CHANNEL1,
     NRF_PPI_CHANNEL2, NRF_PPI_CHANNEL3, NRF_PPI_CHANNEL4, NRF_PPI_CHANNEL5,
     NRF_PPI_CHANNEL6, NRF_PPI_CHANNEL7, NRF_PPI_CHANNEL8, NRF_PPI_CHANNEL9,
     NRF_PPI_CHANNEL10, NRF_PPI_CHANNEL11, NRF_PPI_CHANNEL12, NRF_PPI_CHANNEL13,
     NRF_PPI_CHANNEL14, NRF_PPI_CHANNEL15, NRF_PPI_CHANNEL16, NRF_PPI_CHANNEL17,
     NRF_PPI_CHANNEL18, NRF_PPI_CHANNEL19};
-nrf_gpiote_tasks_t gpio_taskNo[] = {NRF_GPIOTE_TASKS_OUT_0,
+
+const nrf_gpiote_tasks_t gpio_taskNo[] = {NRF_GPIOTE_TASKS_OUT_0,
     NRF_GPIOTE_TASKS_OUT_1, NRF_GPIOTE_TASKS_OUT_2, NRF_GPIOTE_TASKS_OUT_3,
     NRF_GPIOTE_TASKS_OUT_4, NRF_GPIOTE_TASKS_OUT_5, NRF_GPIOTE_TASKS_OUT_6,
     NRF_GPIOTE_TASKS_OUT_7};
-nrf_gpiote_events_t gpio_eventNo[] = {NRF_GPIOTE_EVENTS_IN_0,
+
+const nrf_gpiote_events_t gpio_eventNo[] = {NRF_GPIOTE_EVENTS_IN_0,
     NRF_GPIOTE_EVENTS_IN_1, NRF_GPIOTE_EVENTS_IN_2, NRF_GPIOTE_EVENTS_IN_3,
     NRF_GPIOTE_EVENTS_IN_4, NRF_GPIOTE_EVENTS_IN_5, NRF_GPIOTE_EVENTS_IN_6,
     NRF_GPIOTE_EVENTS_IN_7};
-NRF_TIMER_Type * timers[] = { NRF_TIMER0, NRF_TIMER1, NRF_TIMER2,
-                              NRF_TIMER3, NRF_TIMER4 };
-int timerNo = 1; // 0 is used by soft device
 
-uint8_t first_free_channel=0;
-uint8_t gpiote_config_index=0;
-uint8_t event_index;
-uint8_t task_index;
-
-uint32_t milliSec=1000;
-uint32_t outputPin=LED_BUILTIN;
-uint32_t inputPin=0;                                                        // TODO
+NRF_TIMER_Type* const timers[] = { NRF_TIMER0, NRF_TIMER1, NRF_TIMER2,
+                                   NRF_TIMER3, NRF_TIMER4 };
 
 
 //public functions
+
+PPIClass::PPIClass() {
+    timerNo = 1; // 0 is used by soft device
+    milliSec = 1000;
+}
+
 
 int PPIClass::setShortcut(event_type event, task_type task){
     //check if there is still a free channel
@@ -162,6 +161,18 @@ void PPIClass::setTimerInterval(uint32_t msec){
     milliSec=msec;
 }
 
+void PPIClass::setTimer(int _timerNo) {
+    timerNo = _timerNo;
+}
+
+void PPIClass::resetChannels() {
+    // TODO: reset first_free_channel too
+    for (int i = 0; i < 20; i++) {
+        nrf_ppi_channel_endpoint_setup(channels[i], 0, 0);
+        nrf_ppi_channel_disable(channels[i]);
+    }
+}
+
 //private function
 
 //functions to configure events
@@ -229,16 +240,5 @@ void PPIClass::configureGPIOTask(task_type task){
     gpiote_config_index++;
 }
 
-void PPIClass::setTimer(int _timerNo) {
-    timerNo = _timerNo;
-}
-
-void PPIClass::resetChannels() {
-    // TODO: reset first_free_channel too
-    for (int i = 0; i < 20; i++) {
-        nrf_ppi_channel_endpoint_setup(channels[i], 0, 0);
-        nrf_ppi_channel_disable(channels[i]);
-    }
-}
-
 PPIClass PPI;
+
