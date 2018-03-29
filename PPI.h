@@ -32,24 +32,17 @@
 
 
 //enumerate events and tasks
-//first nibble: peripheral involved (0 -> timer, 1 -> gpio, etc)
-//second nibble: event or task index
 typedef enum{
-    TIMER = 0X00,
-    PIN_HIGH = 0X10,
-    PIN_LOW = 0X11,
-    PIN_CHANGE = 0X12,
+    PIN_HIGH = 0,
+    PIN_LOW = 1,
+    PIN_CHANGE = 2,
 }event_type;
 
 typedef enum{
-    TIMER_START = 0X00,
-    TIMER_STOP = 0X01,
-    TIMER_CLEAR = 0X02,
-    TIMER_CAPTURE = 0X03,
-    TIMER_DEFAULT = 0X0F,
-    PIN_SET = 0X10,
-    PIN_CLEAR = 0X11,
-    PIN_TOGGLE = 0X12,
+    TIMER_START = 0,
+    TIMER_STOP = 1,
+    TIMER_CLEAR = 2,
+    TIMER_CAPTURE = 3,
 }task_type;
 
 class PPIClass{
@@ -88,31 +81,6 @@ class PPIClass{
         /**
          * @brief
          * Name:
-         *            setOutputPin
-         * Description:
-         *            Select the target pin of the action.
-         * Argument:
-         *            pin: pin's number.
-         */
-        void setOutputPin(uint32_t pin);
-
-
-        /**
-         * @brief
-         * Name:
-         *            setTimerInterval
-         * Description:
-         *            Select an interval time taken into account when the event
-         *            is related to the timer.
-         * Argument:
-         *            msec: time interval (in milliseconds).
-         */
-        void setTimerInterval(uint32_t msec);
-
-
-        /**
-         * @brief
-         * Name:
          *            setTimer
          * Description:
          *            Set timer number for the object
@@ -129,7 +97,10 @@ class PPIClass{
          * Description:
          *            Reset PPI channels
          */
-        void resetChannels();
+        inline void resetChannels(){
+            nrf_ppi_channel_disable_all();
+            first_free_channel = 0;
+        }
 
     private:
 
@@ -140,12 +111,9 @@ class PPIClass{
         uint8_t event_index;
         uint8_t task_index;
 
-        uint32_t milliSec;
-        uint32_t outputPin;
         uint32_t inputPin;
 
-        void configureTimer(task_type task=TIMER_DEFAULT);
-        void configureGPIOTask(task_type task);
+        void configureTimer();
         void configureGPIOEvent(event_type event);
 
 };

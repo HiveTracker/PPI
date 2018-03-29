@@ -34,6 +34,7 @@ void callback() {
     digitalWrite(PIN_SERIAL_RX, state = !state);
 
     Serial.println(cc/16.); // convert to microseconds
+    setPPIcaptures();
 }
 
 
