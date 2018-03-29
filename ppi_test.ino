@@ -40,47 +40,39 @@ void callback() {
 void loop() {}
 
 
-// Ideal setting function:
+// Time stamp both rising and falling edges for the 4 photodiodes
+// Timer 1: diode 0: channels: 0, 1 (rising, falling edge)
+//          diode 1: channels: 2, 3 (rising, falling edge)
+// Timer 2: diode 2: channels: 4, 5 (rising, falling edge)
+//          diode 3: channels: 6, 7 (rising, falling edge)
 void setPPIcaptures() {
     PPI.resetChannels();    // TODO?
 
-    PPI.setTimer(1);
+    for (int i = 0; i < 4; i++) {
+        PPI.setTimer(i/2 + 1);                      // timers 1 and 2
 
-    PPI.setInputPin(diode_e_pins[0]);
-    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // channel 0
-    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // channel 1
-
-    PPI.setInputPin(diode_e_pins[1]);
-    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // channel 2
-    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // channel 3
-
-    PPI.setTimer(2);
-
-    PPI.setInputPin(diode_e_pins[2]);
-    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // channel 0
-    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // channel 1
-
-    PPI.setInputPin(diode_e_pins[3]);
-    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // channel 2
-    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // channel 3
+        PPI.setInputPin(diode_e_pins[i]);           // diode 0 to 3
+        PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE);   // channel i*2
+        PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE);   // channel i*2 + 1
+    }
 }
 
 
 
-// Ideal setting function:
+// Clear both timers in case of rising edge for the 4 photodiodes
+// This needs to be disabled as soon as any edge is detected
+// TODO: try using TASKS_CHG[i].DIS with FORK.TEP[i]
 void setPPIclears() {
     PPI.resetChannels();    // TODO?
 
-    PPI.setTimer(1);
-    for (int i = 0; i < 4; i++) {
-        PPI.setInputPin(diode_e_pins[0]);
-        PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // channel 0 to 3
-    }
+    // timers 1 & 2, on 4 channels
+    for (int timerNo = 1; timerNo <= 2; timerNo++) {
+        PPI.setTimer(timerNo);
 
-    PPI.setTimer(2);
-    for (int i = 0; i < 4; i++) {
-        PPI.setInputPin(diode_e_pins[0]);
-        PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // channel 0 to 3
+        for (int i = 0; i < 4; i++) {
+            PPI.setInputPin(diode_e_pins[i]);
+            PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // channel 0 to 3
+        }
     }
 }
 
