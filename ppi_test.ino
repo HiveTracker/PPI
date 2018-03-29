@@ -47,45 +47,40 @@ void setPPIcaptures() {
     PPI.setTimer(1);
 
     PPI.setInputPin(diode_e_pins[0]);
-    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // chanel 0
-    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // chanel 1
+    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // channel 0
+    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // channel 1
 
     PPI.setInputPin(diode_e_pins[1]);
-    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // chanel 2
-    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // chanel 3
+    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // channel 2
+    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // channel 3
 
     PPI.setTimer(2);
 
     PPI.setInputPin(diode_e_pins[2]);
-    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // chanel 0
-    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // chanel 1
+    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // channel 0
+    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // channel 1
 
     PPI.setInputPin(diode_e_pins[3]);
-    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // chanel 2
-    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // chanel 3
+    PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE); // channel 2
+    PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE); // channel 3
 }
 
 
 
 // Ideal setting function:
-void setPPIresets() {
+void setPPIclears() {
     PPI.resetChannels();    // TODO?
 
     PPI.setTimer(1);
-
-    PPI.setInputPin(diode_e_pins[0]);
-    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // chanel 0
-
-    PPI.setInputPin(diode_e_pins[1]);
-    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // chanel 1
+    for (int i = 0; i < 4; i++) {
+        PPI.setInputPin(diode_e_pins[0]);
+        PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // channel 0 to 3
+    }
 
     PPI.setTimer(2);
-
-    PPI.setInputPin(diode_e_pins[2]);
-    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // chanel 2
-
-    PPI.setInputPin(diode_e_pins[3]);
-    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // chanel 3
+    for (int i = 0; i < 4; i++) {
+        PPI.setInputPin(diode_e_pins[0]);
+        PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // channel 0 to 3
+    }
 }
-
 
