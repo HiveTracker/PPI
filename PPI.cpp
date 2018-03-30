@@ -48,6 +48,8 @@ NRF_TIMER_Type* const timers[] = { NRF_TIMER0, NRF_TIMER1, NRF_TIMER2,
 const nrf_gpiote_polarity_t gpio_polarity[] = { NRF_GPIOTE_POLARITY_LOTOHI,
     NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIOTE_POLARITY_TOGGLE };
 
+const nrf_timer_task_t capture_tasks[] = { NRF_TIMER_TASK_CAPTURE0,
+    NRF_TIMER_TASK_CAPTURE1, NRF_TIMER_TASK_CAPTURE2, NRF_TIMER_TASK_CAPTURE3 };
 
 //public functions
 
@@ -62,26 +64,14 @@ int PPIClass::setShortcut(event_type event, task_type task){
         return 0;
 
     configureGPIOEvent(event);
-    configureTimer();
+    configureTimer();                                           // TODO: handle TIMER_STOP...
 
-    nrf_timer_task_t nrf_task;
+    nrf_timer_task_t nrf_task = nrf_timer_task_t(task);
 
-    switch(task){
-        case TIMER_CLEAR:
-            nrf_task = NRF_TIMER_TASK_CLEAR;
-            break;
-        case TIMER_START:
-            nrf_task = NRF_TIMER_TASK_START;
-            break;
-        case TIMER_CAPTURE:
-            nrf_task = NRF_TIMER_TASK_CAPTURE0; // TODO: MAKE IT GENERIC
-            break;
-        case TIMER_STOP:
-            nrf_task = NRF_TIMER_TASK_STOP;
-            break;
-        default: //task not recognized
-            return 0;
-    }
+    static int capture_index = 0;
+    if (task == TIMER_CAPTURE)
+        nrf_task = capture_tasks[capture_index];
+    capture_index = (capture_index >= 3)? 0 : capture_index+1;
 
     nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
             (uint32_t)nrf_gpiote_event_addr_get(gpio_eventNo[event_index]),

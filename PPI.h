@@ -39,10 +39,10 @@ typedef enum{
 }event_type;
 
 typedef enum{
-    TIMER_START = 0,
-    TIMER_STOP = 1,
-    TIMER_CLEAR = 2,
-    TIMER_CAPTURE = 3,
+    TIMER_START = NRF_TIMER_TASK_START,
+    TIMER_STOP =  NRF_TIMER_TASK_STOP,
+    TIMER_CLEAR = NRF_TIMER_TASK_CLEAR,
+    TIMER_CAPTURE
 }task_type;
 
 class PPIClass{
