@@ -1,27 +1,32 @@
-const int testPin = 0;
+const int testPins[] = {0, 1, 2, 3};
 
-/* Timings in microseconds
+/* approximative timings in microseconds
     ___                ___
 ___|   |_____...______|   |_____...
-   0  100           2000 2100
+   0  100           1000 1100
 
 */
 
 void setup()
 {
-    pinMode(testPin, OUTPUT);
+    for (int i = 0; i < 4; i++)
+        pinMode(testPins[i], OUTPUT);
 }
 
 
 void loop()
 {
-    digitalWrite(testPin, HIGH);
+    for (int i = 0; i < 4; i++)
+        digitalWriteFast(testPins[i], HIGH);
     delayMicroseconds(100);
 
-    digitalWrite(testPin, LOW);
-    delayMicroseconds(1900);
+    for (int i = 0; i < 4; i++)
+        digitalWriteFast(testPins[i], LOW);
+    delayMicroseconds(900);
 }
 
+
+// TODO later:
 
 /* Timings examples in microseconds
     ______              ______                       _                       ___
