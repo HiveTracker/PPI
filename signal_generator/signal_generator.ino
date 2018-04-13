@@ -1,9 +1,9 @@
 const int testPins[] = {0, 1, 2, 3};
 
 /* approximative timings in microseconds
-    ___                ___
-___|   |_____...______|   |_____...
-   0  100           1000 1100
+    _                __
+___| |_____...______|  |_____...
+   0 100         4000  4200
 
 */
 
@@ -17,12 +17,20 @@ void setup()
 void loop()
 {
     for (int i = 0; i < 4; i++)
-        digitalWriteFast(testPins[i], HIGH);
+        digitalWriteFast(testPins[i], HIGH);    // FAST digital write
     delayMicroseconds(100);
 
     for (int i = 0; i < 4; i++)
         digitalWriteFast(testPins[i], LOW);
-    delayMicroseconds(900);
+    delayMicroseconds(4900);
+
+    for (int i = 0; i < 4; i++)
+        digitalWrite(testPins[i], HIGH);        // SLOW digital write
+    delayMicroseconds(200);
+
+    for (int i = 0; i < 4; i++)
+        digitalWrite(testPins[i], LOW);
+    delayMicroseconds(4800);
 }
 
 
