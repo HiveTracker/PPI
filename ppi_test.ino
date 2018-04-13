@@ -3,6 +3,9 @@
 
 bool state = 0;
 
+int captures[2][4] = {{0}}; // 2 timers, 4 channels
+
+
 void setup() {
     Serial.setPins(0, PIN_SERIAL_TX);
     Serial.begin(230400);
@@ -58,6 +61,18 @@ void setPPIcaptures() {
     }
 }
 
+
+void getPPIcaptures() {
+    // Timers 1 and 2, on 4 channels (0 to 3)
+    for (int t = 1; t <= 2; t++) {
+        for (int c = 0; c < 4; c++) {
+            captures[t-1][c] = nrf_timer_cc_read(timers[t],
+                                                 nrf_timer_cc_channel_t(c));
+            Serial.println(captures[t-1][c]/16.); // convert to microseconds
+        }
+    }
+    Serial.println();
+}
 
 
 // Clear both timers in case of rising edge for the 4 photodiodes
