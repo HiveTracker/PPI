@@ -1,43 +1,49 @@
 #include "customPinout.h"
 #include "PPI.h"
 
-bool state = 0;
+const int pinOut = PIN_SERIAL_RX;
+
+// temporary simplification:
+const int diodes[] = {diode_e_pins[0], diode_d_pins[0],
+                      diode_e_pins[1], diode_d_pins[1]};
 
 int captures[2][4] = {{0}}; // 2 timers, 4 channels
 
 
 void setup() {
-    Serial.setPins(0, PIN_SERIAL_TX);
+    Serial.setPins(0, PIN_SERIAL_TX); // RX is not used here
     Serial.begin(230400);
     Serial.println("Starting...");
 
-    pinMode(PIN_SERIAL_RX, OUTPUT);
+    pinMode(pinOut, OUTPUT);
 
-    // measure pulse width
-    PPI.setInputPin(diode_e_pins[0]);
+    // wait till next negedge to setup PPI captures:
+    while(diodes[0] == 1); // wait
+    while(diodes[0] == 0); // wait
+    setPPIcaptures();
 
-    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR);
+    PPI.setInputPin(diodes[0]);
+    PPI.setTimer(1);
     PPI.setShortcut(PIN_HIGH, TIMER_START);
+    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR);
+    PPI.setTimer(2);
+    PPI.setShortcut(PIN_HIGH, TIMER_START);
+    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR);
 
-    PPI.setShortcut(PIN_LOW, TIMER_CAPTURE); // capture register 0 for now
-    PPI.setShortcut(PIN_LOW, TIMER_STOP); // capture register 0 for now
-
-    // interrupt
-    attachInterrupt(diode_e_pins[0], callback, FALLING);
+    attachInterrupt(diodes[0], callback, FALLING);
 }
 
 
 void callback() {
     // takes about 2.2us from interrupt till this digitalWrite
-    digitalWrite(PIN_SERIAL_RX, state = !state);
+    digitalWrite(pinOut, HIGH);
+    digitalWrite(pinOut, LOW);
 
-    // capture register 0 (takes about 0.8us)
-    int cc = nrf_timer_cc_read(NRF_TIMER1, nrf_timer_cc_channel_t(0));
+    // get capture register values
+    getPPIcaptures();
 
-    digitalWrite(PIN_SERIAL_RX, state = !state);
-
-    Serial.println(cc/16.); // convert to microseconds
-    setPPIcaptures();
+    // rearm the interrupt
+    attachInterrupt(diodes[0], callback, FALLING);
 }
 
 
@@ -45,17 +51,17 @@ void loop() {}
 
 
 // Time stamp both rising and falling edges for the 4 photodiodes
-// Timer 1: diode 0: channels: 0, 1 (rising, falling edge)
-//          diode 1: channels: 2, 3 (rising, falling edge)
-// Timer 2: diode 2: channels: 4, 5 (rising, falling edge)
-//          diode 3: channels: 6, 7 (rising, falling edge)
+// Timer 1: diode 0: channels: 0, 1 captures: 0, 1 (rising, falling edge)
+//          diode 1: channels: 2, 3 captures: 2, 3 (rising, falling edge)
+// Timer 2: diode 2: channels: 0, 1 captures: 4, 5 (rising, falling edge)
+//          diode 3: channels: 2, 3 captures: 6, 7 (rising, falling edge)
 void setPPIcaptures() {
     PPI.resetChannels();    // TODO?
 
     for (int i = 0; i < 4; i++) {
         PPI.setTimer(i/2 + 1);                      // timers 1 and 2
 
-        PPI.setInputPin(diode_e_pins[i]);           // diode 0 to 3
+        PPI.setInputPin(diodes[i]);                 // diode 0 to 3
         PPI.setShortcut(PIN_HIGH, TIMER_CAPTURE);   // channel i*2
         PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE);   // channel i*2 + 1
     }
@@ -81,12 +87,12 @@ void getPPIcaptures() {
 void setPPIclears() {
     PPI.resetChannels();    // TODO?
 
-    // timers 1 & 2, on 4 channels
-    for (int timerNo = 1; timerNo <= 2; timerNo++) {
-        PPI.setTimer(timerNo);
+    // Timers 1 and 2, on 4 channels (0 to 3)
+    for (int t = 1; t <= 2; t++) {
+        PPI.setTimer(t);
 
-        for (int i = 0; i < 4; i++) {
-            PPI.setInputPin(diode_e_pins[i]);
+        for (int c = 0; c < 4; c++) {
+            PPI.setInputPin(diodes[c]);
             PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // channel 0 to 3
         }
     }
