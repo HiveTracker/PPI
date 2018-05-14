@@ -16,21 +16,19 @@ void setup()
 
 void loop()
 {
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++) {
         digitalWriteFast(testPins[i], HIGH);    // FAST digital write
-    delayMicroseconds(100);
+        delayMicroseconds(500);
+    }
 
-    for (int i = 0; i < 4; i++)
+    delay(1);
+
+    for (int i = 0; i < 4; i++) {
         digitalWriteFast(testPins[i], LOW);
-    delayMicroseconds(4900);
+        delayMicroseconds(500);
+    }
 
-    for (int i = 0; i < 4; i++)
-        digitalWrite(testPins[i], HIGH);        // SLOW digital write
-    delayMicroseconds(200);
-
-    for (int i = 0; i < 4; i++)
-        digitalWrite(testPins[i], LOW);
-    delayMicroseconds(4800);
+    delay(30);
 }
 
 

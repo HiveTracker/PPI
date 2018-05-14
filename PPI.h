@@ -100,6 +100,7 @@ class PPIClass{
         inline void resetChannels(){
             nrf_ppi_channel_disable_all();
             first_free_channel = 0;
+            gpiote_config_index = 0;
         }
 
     private:
@@ -109,7 +110,6 @@ class PPIClass{
         uint8_t first_free_channel;
         uint8_t gpiote_config_index;
         uint8_t event_index;
-        uint8_t task_index;
 
         uint32_t inputPin;
 

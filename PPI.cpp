@@ -58,31 +58,41 @@ PPIClass::PPIClass() {
 }
 
 
+#include <stdio.h>
 int PPIClass::setShortcut(event_type event, task_type task){
     //check if there is still a free channel
-    if(first_free_channel==20)
+    if(first_free_channel==20) {
+        Serial.println("\n !!! WAAARNING !!! first_free_channel==20 !!!");
         return 0;
+    }
+
+    //enable sensing
+    nrf_gpiote_event_enable(event_index);
 
     configureGPIOEvent(event);
     configureTimer();                                           // TODO: handle TIMER_STOP...
 
     nrf_timer_task_t nrf_task = nrf_timer_task_t(task);
 
+
     static int capture_index = 0;
     if (task == TIMER_CAPTURE)
         nrf_task = capture_tasks[capture_index];
+
+    char buf[128];
+    sprintf(buf, "\t\t\t \t\t TCFE: %d, %d, %d\n", timerNo, capture_index, first_free_channel);
+    Serial.print(buf);
+
     capture_index = (capture_index >= 3)? 0 : capture_index+1;
+
 
     nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
             (uint32_t)nrf_gpiote_event_addr_get(gpio_eventNo[event_index]),
             (uint32_t)nrf_timer_task_address_get(timers[timerNo], nrf_task));
     nrf_ppi_channel_enable(channels[first_free_channel]);
 
-    //enable sensing
-    nrf_gpiote_event_enable(event_index);
-
     first_free_channel++;
-    return 1;
+    return (first_free_channel-1);
 }
 
 
@@ -106,8 +116,10 @@ void PPIClass::configureTimer(){                                  // TODO: CHECK
 
 void PPIClass::configureGPIOEvent(event_type event){
     //if user use more than the allowed number of gpio, overwrite previous configuration
-    if(gpiote_config_index==8)
+    if(gpiote_config_index==8) {
+        Serial.println("\n !!! WAAARNING !!! gpiote_config_index==8 !!!");
         gpiote_config_index=0;
+    }
     nrf_gpiote_event_configure(gpiote_config_index, inputPin, gpio_polarity[event]);
 
     event_index=gpiote_config_index;
