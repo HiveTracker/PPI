@@ -75,10 +75,10 @@ int PPIClass::setShortcut(event_type event, task_type task){
 
 
     static int capture_index = 0;
-    if (task == TIMER_CAPTURE)
+    if (task == TIMER_CAPTURE) {
         nrf_task = capture_tasks[capture_index];
-    capture_index = (capture_index >= 3)? 0 : capture_index+1;
-
+        capture_index = (capture_index >= 3)? 0 : capture_index+1;
+    }
 
     nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
             (uint32_t)nrf_gpiote_event_addr_get(gpio_eventNo[event_index]),
