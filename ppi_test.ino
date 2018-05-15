@@ -16,7 +16,11 @@ void setup() {
     Serial.begin(230400);
 
     pinMode(pinOut, OUTPUT);
-    setPPIstarts();
+
+    // start timers, they will be sync'ed (reset) in PPI
+    nrf_timer_task_trigger(timers[1], NRF_TIMER_TASK_START);
+    nrf_timer_task_trigger(timers[2], NRF_TIMER_TASK_START);
+    setPPIresets();
 }
 
 
@@ -41,16 +45,17 @@ void loop() {
 }
 
 
-void setPPIstarts() {
+void setPPIresets() {
     PPI.resetChannels();    // TODO?
 
-    PPI.setInputPin(diodes[0]);
-    PPI.setTimer(1);
-    PPI.setShortcut(PIN_HIGH, TIMER_START);
-    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR);
-    PPI.setTimer(2);
-    PPI.setShortcut(PIN_HIGH, TIMER_START);
-    PPI.setShortcut(PIN_HIGH, TIMER_CLEAR);
+    // sync timers using all photodiodes
+    for (int i = 0; i < 4; i++) {
+        PPI.setInputPin(diodes[i]);
+        PPI.setTimer(1);
+        PPI.setShortcut(PIN_HIGH, TIMER_CLEAR);
+        PPI.setTimer(2);
+        PPI.setShortcut(PIN_HIGH, TIMER_CLEAR);
+    }
 }
 
 
@@ -86,7 +91,7 @@ void printCallback() {
     }
     Serial.println();
 
-    setPPIstarts(); // prepare for next loop
+    setPPIresets(); // prepare for next loop
 }
 
 /*
