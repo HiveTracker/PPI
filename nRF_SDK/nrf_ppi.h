@@ -229,10 +229,6 @@ __STATIC_INLINE void nrf_ppi_channel_endpoint_setup(nrf_ppi_channel_t channel,
         uint32_t          eep,
         uint32_t          tep)
 {
-    char buf[128];
-    sprintf(buf, "\t\t\t \t\t\t \t cet: %d, %x, %x\n", int(channel), eep, tep);
-    Serial.print(buf);
-
     NRF_PPI->CH[(uint32_t) channel].EEP = eep;
     NRF_PPI->CH[(uint32_t) channel].TEP = tep;
 }

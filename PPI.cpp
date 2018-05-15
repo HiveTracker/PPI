@@ -58,7 +58,6 @@ PPIClass::PPIClass() {
 }
 
 
-#include <stdio.h>
 int PPIClass::setShortcut(event_type event, task_type task){
     //check if there is still a free channel
     if(first_free_channel==20) {
@@ -78,11 +77,6 @@ int PPIClass::setShortcut(event_type event, task_type task){
     static int capture_index = 0;
     if (task == TIMER_CAPTURE)
         nrf_task = capture_tasks[capture_index];
-
-    char buf[128];
-    sprintf(buf, "\t\t\t \t\t TCFE: %d, %d, %d\n", timerNo, capture_index, first_free_channel);
-    Serial.print(buf);
-
     capture_index = (capture_index >= 3)? 0 : capture_index+1;
 
 

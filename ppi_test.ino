@@ -26,13 +26,6 @@ void loop() {
     if (digitalRead(diodes[0]) && old_state == 0) {
         NRF_TIMER1->TASKS_CAPTURE[0] = 1;
 
-    digitalWrite(pinOut, HIGH);
-    digitalWrite(pinOut, LOW);
-    digitalWrite(pinOut, HIGH);
-    digitalWrite(pinOut, LOW);
-    digitalWrite(pinOut, HIGH);
-    digitalWrite(pinOut, LOW);
-
         uint32_t val = NRF_TIMER2->CC[0];
 
         Serial.print("^ ");
@@ -43,11 +36,6 @@ void loop() {
 
 
 void setPPIstarts() {
-    digitalWrite(pinOut, HIGH);
-    digitalWrite(pinOut, LOW);
-
-    Serial.println("* 1 setPPIstarts");
-
     PPI.resetChannels();    // TODO?
 
     PPI.setInputPin(diodes[0]);
@@ -68,20 +56,10 @@ void setPPIstarts() {
 // Timer 2: diode 2: channels: 0, 1 captures: 4, 5 (rising, falling edge)
 //          diode 3: channels: 2, 3 captures: 6, 7 (rising, falling edge)
 void setPPIcaptures() {
-    Serial.println("$ 2 setPPIcaptures");
-
-    digitalWrite(pinOut, HIGH);
-    digitalWrite(pinOut, LOW);
-    digitalWrite(pinOut, HIGH);
-    digitalWrite(pinOut, LOW);
-
     PPI.resetChannels();    // TODO?
 
     for (int i = 0; i < 4; i++) {
 
-            char buf[128];
-            sprintf(buf, "   tdcc: %d, %d - %d, %d\n", i/2+1, i, i*2, i*2+1);
-            Serial.print(buf);
 
         PPI.setTimer(i/2 + 1);                      // timers 1 and 2
 
@@ -95,17 +73,11 @@ void setPPIcaptures() {
 
 
 void printCallback() {
-    Serial.println("# 3 printCallback");
-
     // Timers 1 and 2, on 4 channels (0 to 3)
     for (int t = 1; t <= 2; t++) {
         for (int c = 0; c < 4; c++) {
             captures[t-1][c] = nrf_timer_cc_read(timers[t],
                                                  nrf_timer_cc_channel_t(c));
-
-            char buf[128];
-            sprintf(buf, "tcc: %d, %d ", t, c);
-            Serial.print(buf);
             Serial.println(captures[t-1][c]/16.); // convert to microseconds
         }
     }

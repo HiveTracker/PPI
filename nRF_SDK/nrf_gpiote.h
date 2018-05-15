@@ -348,10 +348,6 @@ __STATIC_INLINE void nrf_gpiote_event_disable(uint32_t idx)
 
 __STATIC_INLINE void nrf_gpiote_event_configure(uint32_t idx, uint32_t pin, nrf_gpiote_polarity_t polarity)
 {
-    char buf[128];
-    sprintf(buf, "\t\t\t ipp: %lu, %lu, %d\n", idx, pin, int(polarity));
-    Serial.print(buf);
-
     NRF_GPIOTE->CONFIG[idx] &= ~(GPIOTE_CONFIG_PSEL_Msk | GPIOTE_CONFIG_POLARITY_Msk);
     NRF_GPIOTE->CONFIG[idx] |= ((pin << GPIOTE_CONFIG_PSEL_Pos) & GPIOTE_CONFIG_PSEL_Msk) |
         ((polarity << GPIOTE_CONFIG_POLARITY_Pos) & GPIOTE_CONFIG_POLARITY_Msk);
