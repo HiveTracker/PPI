@@ -97,11 +97,7 @@ class PPIClass{
          * Description:
          *            Reset PPI channels
          */
-        inline void resetChannels(){
-            nrf_ppi_channel_disable_all();
-            first_free_channel = 0;
-            gpiote_config_index = 0;
-        }
+        void resetChannels();
 
     private:
 

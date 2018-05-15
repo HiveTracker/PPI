@@ -126,6 +126,12 @@ void PPIClass::configureGPIOEvent(event_type event){
     gpiote_config_index++;
 }
 
+void PPIClass::resetChannels(){
+    nrf_ppi_channel_disable_all();
+    first_free_channel = 0;
+    gpiote_config_index = 0;
+}
+
 
 PPIClass PPI;
 
