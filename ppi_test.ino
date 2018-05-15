@@ -9,29 +9,35 @@ const int diodes[] = {diode_d_pins[1], diode_e_pins[1],
 
 int captures[2][4] = {{0}}; // 2 timers, 4 channels
 
+bool waitingForPrint = 0;
 
 void setup() {
     Serial.setPins(0, PIN_SERIAL_TX); // RX is not used here
     Serial.begin(230400);
 
     pinMode(pinOut, OUTPUT);
-
-    attachInterrupt(diodes[0], setPPIstarts, FALLING);
+    setPPIstarts();
 }
 
 
 void loop() {
     static bool old_state = 0;
+    bool new_state = digitalRead(diodes[0]);
 
-    if (digitalRead(diodes[0]) && old_state == 0) {
-        NRF_TIMER1->TASKS_CAPTURE[0] = 1;
-
-        uint32_t val = NRF_TIMER2->CC[0];
-
-        Serial.print("^ ");
-        Serial.println(val/16.); // convert to microsec
+    if (!new_state && old_state == 1) {
+        digitalWrite(pinOut, HIGH);
+        digitalWrite(pinOut, LOW);
+        if (waitingForPrint) {
+            waitingForPrint = 0;
+            printCallback();
+        } else {
+            digitalWrite(pinOut, HIGH);
+            digitalWrite(pinOut, LOW);
+            setPPIcaptures();
+        }
     }
-    old_state = digitalRead(diodes[0]);
+
+    old_state = new_state;
 }
 
 
@@ -45,8 +51,6 @@ void setPPIstarts() {
     PPI.setTimer(2);
     PPI.setShortcut(PIN_HIGH, TIMER_START);
     PPI.setShortcut(PIN_HIGH, TIMER_CLEAR);
-
-    attachInterrupt(diodes[0], setPPIcaptures, FALLING);
 }
 
 
@@ -60,7 +64,6 @@ void setPPIcaptures() {
 
     for (int i = 0; i < 4; i++) {
 
-
         PPI.setTimer(i/2 + 1);                      // timers 1 and 2
 
         PPI.setInputPin(diodes[i]);                 // diode 0 to 3
@@ -68,7 +71,7 @@ void setPPIcaptures() {
         PPI.setShortcut(PIN_LOW,  TIMER_CAPTURE);   // channel i*2 + 1
     }
 
-    attachInterrupt(diodes[0], printCallback, FALLING);
+    waitingForPrint = 1;
 }
 
 
