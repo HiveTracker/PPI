@@ -18,8 +18,8 @@ void setup() {
     pinMode(pinOut, OUTPUT);
 
     // start timers, they will be sync'ed (reset) in PPI
-    nrf_timer_task_trigger(timers[1], NRF_TIMER_TASK_START);
-    nrf_timer_task_trigger(timers[2], NRF_TIMER_TASK_START);
+    nrf_timer_task_trigger(nrf_timers[1], NRF_TIMER_TASK_START);
+    nrf_timer_task_trigger(nrf_timers[2], NRF_TIMER_TASK_START);
     setPPIresets();
 }
 
@@ -84,7 +84,7 @@ void printCallback() {
     // Timers 1 and 2, on 4 channels (0 to 3)
     for (int t = 1; t <= 2; t++) {
         for (int c = 0; c < 4; c++) {
-            captures[t-1][c] = nrf_timer_cc_read(timers[t],
+            captures[t-1][c] = nrf_timer_cc_read(nrf_timers[t],
                                                  nrf_timer_cc_channel_t(c));
             Serial.println(captures[t-1][c]/16.); // convert to microseconds
         }

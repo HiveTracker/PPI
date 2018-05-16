@@ -120,7 +120,7 @@ class PPIClass{
 
 extern PPIClass PPI;
 
-extern NRF_TIMER_Type* const timers[];
+extern NRF_TIMER_Type* const nrf_timers[];
 
 
 #endif //PPI_h

@@ -42,7 +42,7 @@ const nrf_gpiote_events_t gpio_eventNo[] = {NRF_GPIOTE_EVENTS_IN_0,
     NRF_GPIOTE_EVENTS_IN_4, NRF_GPIOTE_EVENTS_IN_5, NRF_GPIOTE_EVENTS_IN_6,
     NRF_GPIOTE_EVENTS_IN_7};
 
-NRF_TIMER_Type* const timers[] = { NRF_TIMER0, NRF_TIMER1, NRF_TIMER2,
+NRF_TIMER_Type* const nrf_timers[] = { NRF_TIMER0, NRF_TIMER1, NRF_TIMER2,
                                    NRF_TIMER3, NRF_TIMER4 };
 
 const nrf_gpiote_polarity_t gpio_polarity[] = { NRF_GPIOTE_POLARITY_LOTOHI,
@@ -83,7 +83,7 @@ int PPIClass::setShortcut(event_type event, task_type task,
 
     nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
             (uint32_t)nrf_gpiote_event_addr_get(gpio_eventNo[event_index]),
-            (uint32_t)nrf_timer_task_address_get(timers[timerNo], nrf_task));
+            (uint32_t)nrf_timer_task_address_get(nrf_timers[timerNo], nrf_task));
 
     uint32_t fep = 0; // fork end point
 
@@ -99,7 +99,7 @@ int PPIClass::setShortcut(event_type event, task_type task,
             forkTimer = timerNo;
         }
 
-        fep = (uint32_t)nrf_timer_task_address_get(timers[forkTimer], nrf_fork);
+        fep = (uint32_t)nrf_timer_task_address_get(nrf_timers[forkTimer], nrf_fork);
     }
 
     // always configure forks but if not necessary, use 0 as fork end point.
@@ -125,9 +125,9 @@ void PPIClass::setTimer(int _timerNo) {
 
 //functions to configure events
 void PPIClass::configureTimer(int _timerNo){                                  // TODO: CHECK WITH INTERRUPT LIB!
-    nrf_timer_mode_set(timers[_timerNo], NRF_TIMER_MODE_TIMER);
-    nrf_timer_bit_width_set(timers[_timerNo], NRF_TIMER_BIT_WIDTH_32);
-    nrf_timer_frequency_set(timers[_timerNo], NRF_TIMER_FREQ_16MHz);
+    nrf_timer_mode_set(nrf_timers[_timerNo], NRF_TIMER_MODE_TIMER);
+    nrf_timer_bit_width_set(nrf_timers[_timerNo], NRF_TIMER_BIT_WIDTH_32);
+    nrf_timer_frequency_set(nrf_timers[_timerNo], NRF_TIMER_FREQ_16MHz);
 }
 
 void PPIClass::configureGPIOEvent(event_type event){
