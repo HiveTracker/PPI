@@ -55,6 +55,8 @@ const nrf_timer_task_t capture_tasks[] = { NRF_TIMER_TASK_CAPTURE0,
 
 PPIClass::PPIClass() {
     timerNo = 1; // 0 is used by soft device
+    configureTimer(1);
+    configureTimer(2);
 }
 
 
@@ -70,7 +72,6 @@ int PPIClass::setShortcut(event_type event, task_type task,
     nrf_gpiote_event_enable(event_index);
 
     configureGPIOEvent(event);
-    configureTimer(timerNo);                                           // TODO: handle TIMER_STOP...
 
     nrf_timer_task_t nrf_task = nrf_timer_task_t(task);
 
@@ -93,9 +94,7 @@ int PPIClass::setShortcut(event_type event, task_type task,
                                     ? nrf_task
                                     : nrf_timer_task_t(forkTask);
 
-        if (forkTimer >= 0) {
-            configureTimer(forkTimer);
-        } else {
+        if (forkTimer < 0) {
             forkTimer = timerNo;
         }
 
