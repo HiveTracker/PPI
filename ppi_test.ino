@@ -46,15 +46,15 @@ void loop() {
 
 
 void setPPIresets() {
-    PPI.resetChannels();    // TODO?
+    PPI.resetChannels();
+
+    PPI.setTimer(1);
+    int forkTimer = 2;
 
     // sync timers using all photodiodes
     for (int i = 0; i < 4; i++) {
         PPI.setInputPin(diodes[i]);
-        PPI.setTimer(1);
-        PPI.setShortcut(PIN_HIGH, TIMER_CLEAR);
-        PPI.setTimer(2);
-        PPI.setShortcut(PIN_HIGH, TIMER_CLEAR);
+        PPI.setShortcut(PIN_HIGH, TIMER_CLEAR, forkTimer);
     }
 }
 
@@ -65,7 +65,7 @@ void setPPIresets() {
 // Timer 2: diode 2: channels: 0, 1 captures: 4, 5 (rising, falling edge)
 //          diode 3: channels: 2, 3 captures: 6, 7 (rising, falling edge)
 void setPPIcaptures() {
-    PPI.resetChannels();    // TODO?
+    PPI.resetChannels();
 
     for (int i = 0; i < 4; i++) {
 
@@ -94,21 +94,4 @@ void printCallback() {
     setPPIresets(); // prepare for next loop
 }
 
-/*
-// Clear both timers in case of rising edge for the 4 photodiodes
-// This needs to be disabled as soon as any edge is detected
-// TODO: try using TASKS_CHG[i].DIS with FORK.TEP[i]
-void setPPIclears() {
-    PPI.resetChannels();    // TODO?
 
-    // Timers 1 and 2, on 4 channels (0 to 3)
-    for (int t = 1; t <= 2; t++) {
-        PPI.setTimer(t);
-
-        for (int c = 0; c < 4; c++) {
-            PPI.setInputPin(diodes[c]);
-            PPI.setShortcut(PIN_HIGH, TIMER_CLEAR); // channel 0 to 3
-        }
-    }
-}
-*/

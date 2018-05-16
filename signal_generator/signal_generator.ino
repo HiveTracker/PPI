@@ -1,3 +1,4 @@
+#if 1
 const int testPins[] = {0, 1, 2, 3};
 
 /* approximative timings in microseconds
@@ -31,6 +32,7 @@ void loop()
     delay(30);
 }
 
+#else
 
 // TODO later:
 
@@ -39,7 +41,8 @@ void loop()
 ___|      |____________|      |_________..._________| |_________..._________|
    0      62           400    462                5000 5008                  8333
 */
-/*
+
+const int testPin = 0;
 int posTimings[] = {0,  400, 5000};
 int negTimings[] = {62, 462, 5008};
 const int loopTime = 8333;
@@ -87,4 +90,4 @@ void loop()
         }
     }
 }
-*/
+#endif

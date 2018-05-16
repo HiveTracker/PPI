@@ -58,7 +58,8 @@ PPIClass::PPIClass() {
 }
 
 
-int PPIClass::setShortcut(event_type event, task_type task){
+int PPIClass::setShortcut(event_type event, task_type task,
+                          int forkTimer, task_type forkTask) {
     //check if there is still a free channel
     if(first_free_channel==20) {
         Serial.println("\n !!! WAAARNING !!! first_free_channel==20 !!!");
@@ -69,7 +70,7 @@ int PPIClass::setShortcut(event_type event, task_type task){
     nrf_gpiote_event_enable(event_index);
 
     configureGPIOEvent(event);
-    configureTimer();                                           // TODO: handle TIMER_STOP...
+    configureTimer(timerNo);                                           // TODO: handle TIMER_STOP...
 
     nrf_timer_task_t nrf_task = nrf_timer_task_t(task);
 
@@ -83,6 +84,27 @@ int PPIClass::setShortcut(event_type event, task_type task){
     nrf_ppi_channel_endpoint_setup(channels[first_free_channel],
             (uint32_t)nrf_gpiote_event_addr_get(gpio_eventNo[event_index]),
             (uint32_t)nrf_timer_task_address_get(timers[timerNo], nrf_task));
+
+    uint32_t fep = 0; // fork end point
+
+    if (forkTimer >= 0 || forkTask != TIMER_NONE) {
+
+        nrf_timer_task_t nrf_fork = (forkTask==TIMER_NONE)
+                                    ? nrf_task
+                                    : nrf_timer_task_t(forkTask);
+
+        if (forkTimer >= 0) {
+            configureTimer(forkTimer);
+        } else {
+            forkTimer = timerNo;
+        }
+
+        fep = (uint32_t)nrf_timer_task_address_get(timers[forkTimer], nrf_fork);
+    }
+
+    // always configure forks but if not necessary, use 0 as fork end point.
+    nrf_ppi_fork_endpoint_setup(channels[first_free_channel], fep);
+
     nrf_ppi_channel_enable(channels[first_free_channel]);
 
     first_free_channel++;
@@ -102,10 +124,10 @@ void PPIClass::setTimer(int _timerNo) {
 //private function
 
 //functions to configure events
-void PPIClass::configureTimer(){                                  // TODO: CHECK WITH INTERRUPT LIB!
-    nrf_timer_mode_set(timers[timerNo], NRF_TIMER_MODE_TIMER);
-    nrf_timer_bit_width_set(timers[timerNo], NRF_TIMER_BIT_WIDTH_32);
-    nrf_timer_frequency_set(timers[timerNo], NRF_TIMER_FREQ_16MHz);
+void PPIClass::configureTimer(int _timerNo){                                  // TODO: CHECK WITH INTERRUPT LIB!
+    nrf_timer_mode_set(timers[_timerNo], NRF_TIMER_MODE_TIMER);
+    nrf_timer_bit_width_set(timers[_timerNo], NRF_TIMER_BIT_WIDTH_32);
+    nrf_timer_frequency_set(timers[_timerNo], NRF_TIMER_FREQ_16MHz);
 }
 
 void PPIClass::configureGPIOEvent(event_type event){

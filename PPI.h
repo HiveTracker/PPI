@@ -42,7 +42,8 @@ typedef enum{
     TIMER_START = NRF_TIMER_TASK_START,
     TIMER_STOP =  NRF_TIMER_TASK_STOP,
     TIMER_CLEAR = NRF_TIMER_TASK_CLEAR,
-    TIMER_CAPTURE
+    TIMER_CAPTURE,
+    TIMER_NONE
 }task_type;
 
 class PPIClass{
@@ -61,8 +62,11 @@ class PPIClass{
          * Arguments:
          *            -event: event to which bind the related action.
          *            -task: action to be taken when the event occurs.
+         *            -forkTimer: optional secondary timer as for action to be taken
+         *            -forkTask: optional secondary action to be taken when the event occurs.
          */
-        int setShortcut(event_type event, task_type task);
+        int setShortcut(event_type event, task_type task,
+                        int forkTimer = -1, task_type forkTask = TIMER_NONE);
 
 
         /**
@@ -109,7 +113,7 @@ class PPIClass{
 
         uint32_t inputPin;
 
-        void configureTimer();
+        void configureTimer(int timerNo);
         void configureGPIOEvent(event_type event);
 
 };
